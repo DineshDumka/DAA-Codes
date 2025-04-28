@@ -5,62 +5,65 @@ struct Edge {
     int u, v, weight;
 };
 
-void bellmanFord(int n, int m, vector<Edge>& edges, int source) {
-   
+void bellmanFord(int n, vector<vector<int>>& adjMatrix, int source) {
     vector<int> dist(n, INT_MAX);
+    vector<int> previous(n, -1);
     dist[source] = 0;
 
-    
-    for (int i = 1; i <= n - 1; i++) {
-        for (auto edge : edges) {
-            int u = edge.u;
-            int v = edge.v;
-            int weight = edge.weight;
-            
-            
-            if (dist[u] != INT_MAX && dist[u] + weight < dist[v]) {
-                dist[v] = dist[u] + weight;
+    for (int i = 0; i < n - 1; i++) {
+        for (int u = 0; u < n; u++) {
+            for (int v = 0; v < n; v++) {
+                if (adjMatrix[u][v] != 0 && dist[u] != INT_MAX && dist[u] + adjMatrix[u][v] < dist[v]) {
+                    dist[v] = dist[u] + adjMatrix[u][v];
+                    previous[v] = u;
+                }
             }
         }
     }
 
-    
-    for (auto edge : edges) {
-        int u = edge.u;
-        int v = edge.v;
-        int weight = edge.weight;
-        
-        if (dist[u] != INT_MAX && dist[u] + weight < dist[v]) {
-            cout << "Graph contains negative weight cycle\n";
-            return;
+    for (int i = 0; i < n; i++) {
+        if (dist[i] == INT_MAX) {
+            cout << i + 1 << " : INF" << endl;
+        } else {
+            vector<int> path;
+            for (int v = i; v != -1; v = previous[v]) {
+                path.push_back(v);
+            }
+            reverse(path.begin(), path.end());
+            cout << i + 1 << " : ";
+            for (int j = 0; j < path.size(); j++) {
+                cout << path[j] + 1;
+                if (j != path.size() - 1) {
+                    cout << " ";
+                }
+            }
+            cout << " : " << dist[i] << endl;
         }
     }
-
-    
-    for (int i = 0; i < n; i++) {
-        if (dist[i] == INT_MAX)
-            cout << "INF ";
-        else
-            cout << dist[i] << " ";
-    }
-    cout << endl;
 }
 
 int main() {
-    int n, m;  
-    cin >> n >> m;
-    
-    vector<Edge> edges(m);
-    
-    
-    for (int i = 0; i < m; i++) {
-        cin >> edges[i].u >> edges[i].v >> edges[i].weight;
+    int n;
+    cin >> n;
+
+    vector<vector<int>> adjMatrix(n, vector<int>(n, 0));
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            cin >> adjMatrix[i][j];
+        }
     }
-    
+
     int source;
-    cin >> source;  
-    
-    bellmanFord(n, m, edges, source);
-    
+    cin >> source;
+    source--;
+
+    bellmanFord(n, adjMatrix, source);
+
     return 0;
 }
+
+
+
+//output format 
+//destination_vertex_number : path_from_destination_to_source : minimum_path_weight
